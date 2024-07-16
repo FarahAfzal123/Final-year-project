@@ -98,26 +98,6 @@ catch{
 }
 }
 
-// const verifiedCode = async (req, res) => {
-//     try {
-//         const { email, verificationcode } = req.body;
-//         const emaildetect = await user.findOne({ email });
-
-//         if (!emaildetect) {
-//             return res.send({ message: 'User not found.' });
-//         }
-
-//         if (emaildetect.verificationCode === verificationcode) {
-//             return res.send({ message: 'Verification code successfully verified.' });
-//         } else {
-//             return res.send({ message: 'Invalid verification code.' });
-//         }
-//     } catch (error) {
-//         console.error(error);
-//         return res.status(500).send({ message: 'Internal server error.' });
-//     }
-// };
-
 
 
 
@@ -215,88 +195,9 @@ const requireSignIn = async (req, res) => {
 }
 
 
-const forgetpassword = async (req, res) => {
-    try {
-        const { email } = req.body;
-        const userdata = await user.findOne({ email: email });
-
-        if (!userdata) {
-            return res.status(401).send({
-                message: "Email not Found"
-            })
-        }
-        const token = Jwt.sign({ userId: userdata._id }, `${process.env.JWTT}`, { expiresIn: '1h' });
-        // const secret = Jwt + userdata.password;
-        // console.log(secret);
-
-        // const token = Jwt.sign({ email: userdata.email, id: userdata._id }, secret, { expiresIn: '1h' });
-        // const link = `http:localhost:8081/reset-password/${userdata._id}/${token}`;
-        // console.log(link);
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: 'noranahmed653@gmail.com',
-                pass: 'Baz@ar65',
-            },
-        });
-
-        const mailOptions = {
-            from: 'noranahmed653@gmail.com',
-            to: email,
-            subject: 'Password Reset',
-            text: `Click the following link to reset your password: http://localhost:8081/reset-password/${userdata._id}/${token}`,
-
-        };
-
-        console.log(`http://localhost:8081/reset-password/${userdata._id}/${token}`)
-
-        //   console.log(text)  
-
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                return res.status(500).json({ message: 'Failed to send email' });
-            }
-
-            res.json({ message: 'Email sent successfully' });
-        });
-    }
-    catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Internal Server Error' });
-    }
-}
-
-const resetpassword = async (req, res) => {
-
-    const { Id, token } = req.params;
-    const { newPassword } = req.body;
-
-    try {
-        const newuser = await user.findById(Id);
-
-        if (!newuser) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        // Verify the token
-        Jwt.verify(token, `${process.env.JWTT}`, (err, decodedToken) => {
-            if (err) {
-                return res.status(401).json({ message: 'Invalid or expired token' });
-            }
-            const hashedPassword = bcrypt.hash(newPassword, 10);
-            console.log(hashedPassword);
-            // Update the user's password
-            newuser.password = hashedPassword;
-            newuser.save()
 
 
-            res.json({ message: 'Password reset successful' });
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal Server Error' });
-    }
-};
+
 
 const Allstudents = async(req,res)=>{
     try{
@@ -320,4 +221,4 @@ const Allstudents = async(req,res)=>{
 
 }
 
-export { register, login, requireSignIn, forgetpassword, resetpassword, deletecall, verifiedCode, Allstudents };
+export { register, login, requireSignIn, deletecall, verifiedCode, Allstudents };
